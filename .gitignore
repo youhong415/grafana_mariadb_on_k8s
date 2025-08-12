@@ -1,5 +1,6 @@
 mariadb-data/
 prometheus-data/
+grafana-data/
 
 # Ignore environment variables file
 .env
