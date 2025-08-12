@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-mariadb-on-k8s-mariadb
+  labels:
+    app: grafana-mariadb-on-k8s-mariadb
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-mariadb-on-k8s-mariadb
+  template:
+    metadata:
+      labels:
+        app: grafana-mariadb-on-k8s-mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: mariadb:10.5
+          ports:
+            - containerPort: 3306
+              name: mysql
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-mariadb-on-k8s-mariadb-secret
+                  key: password
+          volumeMounts:
+            - name: mariadb-storage
+              mountPath: /var/lib/mysql
+
+        - name: mysqld-exporter
+          image: prom/mysqld-exporter:v0.14.0
+          ports:
+            - containerPort: 9104
+              name: metrics
+          env:
+            - name: DATA_SOURCE_NAME
+              value: "root:$(MYSQL_ROOT_PASSWORD)@(localhost:3306)/"
+            - name: MYSQL_ROOT_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-mariadb-on-k8s-mariadb-secret
+                  key: password
+      volumes:
+        - name: mariadb-storage
+          persistentVolumeClaim:
+            claimName: grafana-mariadb-on-k8s-mariadb-pvc

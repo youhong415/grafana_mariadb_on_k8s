@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-mariadb-on-k8s-flask-app
+  labels:
+    app: grafana-mariadb-on-k8s-flask-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-mariadb-on-k8s-flask-app
+  template:
+    metadata:
+      labels:
+        app: grafana-mariadb-on-k8s-flask-app
+    spec:
+      containers:
+        - name: flask-app
+          image: youhongji/grafana_mariadb_on_k8s-flask-app:v1
+          ports:
+            - containerPort: 5000
+          env:
+            - name: DB_HOST
+              value: "grafana-mariadb-on-k8s-mariadb-service"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: grafana-mariadb-on-k8s-mariadb-secret
+                  key: password

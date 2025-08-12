@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana-mariadb-on-k8s-grafana
+  labels:
+    app: grafana-mariadb-on-k8s-grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana-mariadb-on-k8s-grafana
+  template:
+    metadata:
+      labels:
+        app: grafana-mariadb-on-k8s-grafana
+    spec:
+      containers:
+        - name: grafana
+          image: grafana/grafana:latest # Use the latest Grafana image
+          ports:
+            - containerPort: 3000
+          volumeMounts:
+            - name: grafana-storage-volume
+              mountPath: /var/lib/grafana
+      volumes:
+        - name: grafana-storage-volume
+          persistentVolumeClaim:
+            claimName: grafana-mariadb-on-k8s-grafana-pvc
